@@ -24,8 +24,6 @@ while client_connected == False:
     except:
         continue
 
-reqnewframe = "Y"
-
 #MAIN LOOP
 
 while True:

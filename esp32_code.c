@@ -77,7 +77,7 @@ int main(){
             length = uart_read_bytes(uart_num, data, length, 100);
 
             if (length > 0) {
-                send(clientSocket, data, length, 0);
+                send(clientSocket, data, length, MSG_DONTWAIT);
                 uart_flush(UART_NUM_1);
             }
 
@@ -92,11 +92,9 @@ int main(){
                 continue;
                 }
                 else {
-                break;
+                uart_write_bytes(UART_NUM_1, (const char*)server_message, strlen(server_message));
                 }
             }
-
-            uart_write_bytes(UART_NUM_1, (const char*)server_message, strlen(server_message));
 
             sleep(60); 
 
