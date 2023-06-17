@@ -1,0 +1,48 @@
+body {
+  background: #BBB;
+  color: black;
+  margin: 0;
+}
+.container {
+  display: flex;
+  /* To stack the elements on top of each other vertically */
+  flex-direction: column;  
+  justify-content: center;
+  align-items: center;
+  height: 90vh;
+}
+h1 {
+  font-size: 35px;
+  color: #333;
+  text-align: center;
+}
+.rectangle {
+  position: relative;
+  /* 3.42 by 2.4 scaled by multiple of 175.44*/
+  width: 600px;
+  height: 421px;
+  background-color: black;
+  margin-top: 10px;
+}
+.square {
+  /* The square has an absolute position relative to the rectanguler maze  */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  background-color: green;
+  transition: top 0.2s, left 0.2s;
+}
+.line {
+  position: absolute;
+  width: 5px;
+  background-color: red;
+  transition: top 0.2s, left 0.2s;
+}
+.best-route-line {
+  position: absolute;
+  width: 5px;
+  background-color: blue;
+  transition: top 0.2s, left 0.2s;
+}
