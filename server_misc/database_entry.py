@@ -81,9 +81,10 @@ def create_table(dynamodb=None):
     return response
 
 
-def update_table(where, data_things):
+def update_table(where, data_things, heading):
     print("hi")
     # TODO: write the up to data thing, idk
+    #       input heading to be stored with the previous set of coords (new set yet to be calculated)
 
 
 def data_to_distance(sth):  # TODO: add relevant conversion calculation
@@ -106,6 +107,7 @@ def new_coord(prev_coord, data):
 
 
 def main():
+    prev_heading = 0
     coord = [0, 0]
     print("hi")
 
@@ -116,11 +118,14 @@ def main():
 
     # when receive new coords
     mvmnt_data = [5, math.pi/2]
-    coord = new_coord(coord, mvmnt_data)
 
     # TODO: add other things to update table with
 
-    update_table(db_obj, coord)
+    update_table(db_obj, coord, prev_heading)  # before calc new coord, since old heading is only now available
+
+    coord = new_coord(coord, mvmnt_data)
+
+    prev_heading = mvmnt_data[1]
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
