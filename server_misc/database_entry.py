@@ -117,7 +117,7 @@ def main():
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     # when receive new coords
-    mvmnt_data = [5, math.pi/2]
+    mvmnt_data = [5, math.pi/2]  # tcp.receive() or sth
 
     # TODO: add other things to update table with
 
