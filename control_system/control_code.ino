@@ -42,7 +42,6 @@ void updateTimeDiff(){
   prevTime = curTime;
 }
 
-
 long double roll_ang, pitch_ang, yaw_ang;
 
 void calibrate_sensors(int offset_loops){
