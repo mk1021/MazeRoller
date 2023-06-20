@@ -163,7 +163,7 @@ void sensor_update(){
   prev_pitch_ang = pitch_ang;
 
   if (accel_y != 0 || accel_z != 0){
-    pitch_ang = (pitch_ang + pitch_vel*time_diff) * P_CompCoeff; //-gy or +ve???
+    pitch_ang = (pitch_ang + pitch_vel*time_diff) * P_CompCoeff;
     pitch_ang -= (1.0f - P_CompCoeff) * atan(accel_x / sqrt((long)accel_y*accel_y + (long)accel_z*accel_z));
   }
   else pitch_ang += pitch_vel*time_diff;
