@@ -1,12 +1,12 @@
 // Uses A4988 stepper motor driver and Arduino without a library. More info: https://www.makerguides.com
 
 // Define stepper motor connections and steps per revolution:
-#define dirPinL 2
-#define stepPinL 15
-#define stepsPerRevolution 200
+#define stepPinR 23  // D2
+#define dirPinR  22  // D3
+#define stepPinL 21  // D4
+#define dirPinL  19  // D5
 
-#define dirPinR 4
-#define stepPinR 0
+#define stepsPerRevolution 200
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
