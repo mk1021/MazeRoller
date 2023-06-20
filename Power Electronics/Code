@@ -1,153 +1,181 @@
-from machine import Pin, ADC, PWM
+from machine import Pin, ADC, PWM 
 
-import math
+import math 
 
-vret_pin = ADC(Pin(26))
+ 
 
-vout_pin = ADC(Pin(28))
+vret_pin = ADC(Pin(26)) 
 
-vin_pin = ADC(Pin(27))
+vout_pin = ADC(Pin(28)) 
 
-Rret = 1.02
+vin_pin = ADC(Pin(27)) 
 
-goalp = 0.10 #0.10 for red, 0.08 for yellow, 0.05 for blue
+Rret = 1.02 
 
-pwm = PWM(Pin(0))
+goalp = 0.10 #0.10 for red, 0.08 for yellow, 0.05 for blue 
 
-pwm.freq(100000) #T=0.00001s = 10μs
+ 
 
-pwm_en = Pin(1, Pin.OUT)
+pwm = PWM(Pin(0)) 
 
-prev_vin = 0
+pwm.freq(100000) #T=0.00001s = 10μs 
 
-pwm_ini = 40000 #starts at 60.4% duty cycle
+pwm_en = Pin(1, Pin.OUT) 
 
-firstloop = True
+ 
 
-count = 0
+prev_vin = 0 
 
-def analogconv(inv, mode): #converts from bit voltage to volts
+pwm_ini = 40000 #starts at 60.4% duty cycle 
 
-if mode==0:
+firstloop = True 
 
-return (3.3*inv)/65535
+count = 0 
 
-elif mode==1:
+ 
 
-return (inv*(3.3*12.49/2.49))/65535
+def analogconv(inv, mode): #converts from bit voltage to volts 
 
-def bigchange(limitstep, prev_vin): #sees if the input voltage is changed greatly so that the duty cycle changes
+    if mode==0: 
 
-inv = analogconv(vin_pin.read_u16(),1)
+        return (3.3*inv)/65535 
 
-return (math.fabs(inv-prev_vin)>limitstep)
+    elif mode==1: 
 
-def finderror(final):
+        return (inv*(3.3*12.49/2.49))/65535 
 
-i = ((analogconv(vret_pin.read_u16(), 0))/Rret)
+     
 
-v = (analogconv(vout_pin.read_u16(), 1))
+def bigchange(limitstep, prev_vin): #sees if the input voltage is changed greatly so that the duty cycle changes 
 
-power = v*i
+    inv = analogconv(vin_pin.read_u16(),1) 
 
-return math.fabs(power-final)
+    return (math.fabs(inv-prev_vin)>limitstep) 
 
-def findcurrent():
+ 
 
-return ((analogconv(vret_pin.read_u16(), 0))/Rret)
+def finderror(final): 
 
-def saturate(duty):
+    i = ((analogconv(vret_pin.read_u16(), 0))/Rret) 
 
-#duty cycle = duty/65535
+    v = (analogconv(vout_pin.read_u16(), 1)) 
 
-if duty > 62500:
+    power = v*i 
 
-duty = 62500 #95% duty cycle max
+    return math.fabs(power-final) 
 
-if duty < 100:
+ 
 
-duty = 100 #0.1% duty cycle min
+def findcurrent(): 
 
-return duty
+    return ((analogconv(vret_pin.read_u16(), 0))/Rret) 
 
-def feedback(initial, step, goalp):
+ 
 
-Ecurrent = finderror(goalp) #find error between current power and final
+def saturate(duty): 
 
-newduty = saturate(initial+step) #increase duty cycle by specified step
+#duty cycle = duty/65535 
 
-pwm.duty_u16(newduty)
+    if duty > 62500: 
 
-if (findcurrent()>4.9): #safeguard so current is not exceeded
+        duty = 62500 #95% duty cycle max 
 
-newduty=saturate(initial)
+    if duty < 100: 
 
-pwm.duty_u16(newduty)
+        duty = 100 #0.1% duty cycle min 
 
-else: #otherwise, check if the new duty cycle produces is closer to the goal
+    return duty 
 
-Enew = finderror(goalp)
+ 
 
-if Enew>Ecurrent: #if the error is not improved, lower the duty cycle instead
+def feedback(initial, step, goalp): 
 
-newduty = saturate(initial-step)
+    Ecurrent = finderror(goalp) #find error between current power and final 
 
-pwm.duty_u16(newduty)
+    newduty = saturate(initial+step) #increase duty cycle by specified step 
 
-if(findcurrent()<0.01): #safeguard so the LED does not turn off
+    pwm.duty_u16(newduty) 
 
-newduty = saturate(initial)
+    if (findcurrent()>4.9): #safeguard so current is not exceeded 
 
-pwm.duty_u16(newduty)
+        newduty=saturate(initial) 
 
-else: #if neither deviation in duty cycle improves the error, keep the same duty cycle
+        pwm.duty_u16(newduty) 
 
-Enew = finderror(goalp)
+    else: #otherwise, check if the new duty cycle produces is closer to the goal 
 
-if(Enew>Ecurrent):
+        Enew = finderror(goalp) 
 
-newduty = saturate(initial)
+        if Enew>Ecurrent: #if the error is not improved, lower the duty cycle instead 
 
-pwm.duty_u16(newduty)
+            newduty = saturate(initial-step) 
 
-return newduty
+            pwm.duty_u16(newduty) 
 
-while True:
+            if(findcurrent()<0.01): #safeguard so the LED does not turn off 
 
-pwm_en.value(1)
+                newduty = saturate(initial) 
 
-vin = analogconv(vin_pin.read_u16(), 1)
+                pwm.duty_u16(newduty) 
 
-vout = analogconv(vout_pin.read_u16(), 1)
+            else: #if neither deviation in duty cycle improves the error, keep the same duty cycle 
 
-vret = analogconv(vret_pin.read_u16(), 0)
+                Enew = finderror(goalp)  
 
-iout = vret/Rret
+                if(Enew>Ecurrent): 
 
-e = finderror(goalp)
+                    newduty = saturate(initial) 
 
-power = vout*iout
+                    pwm.duty_u16(newduty) 
 
-count = count + 1
+    return newduty 
 
-if firstloop:
+     
 
-pwm_out=saturate(pwm_ini)
+while True: 
 
-pwm.duty_u16(pwm_out)
+     
 
-firstloop = False
+    pwm_en.value(1) 
 
-else:
+    vin = analogconv(vin_pin.read_u16(), 1) 
 
-pwm_out = feedback(saturate(pwm_out), 312, goalp)
+    vout = analogconv(vout_pin.read_u16(), 1) 
 
-if count > 2000: #gives value of pins every 0.02s
+    vret = analogconv(vret_pin.read_u16(), 0) 
 
-if(bigchange(0.5, prev_vin)):
+    iout = vret/Rret 
 
-firstloop = True
+    e = finderror(goalp) 
 
-prev_vin = vin
+    power = vout*iout 
 
-count = 0
+    count = count + 1 
+
+    if firstloop: 
+
+        pwm_out=saturate(pwm_ini) 
+
+        pwm.duty_u16(pwm_out) 
+
+        firstloop = False 
+
+    else: 
+
+        pwm_out = feedback(saturate(pwm_out), 312, goalp) 
+
+ 
+
+     
+
+    if count > 2000: #gives value of pins every 0.02s 
+
+        if(bigchange(0.5, prev_vin)): 
+
+            firstloop = True 
+
+            prev_vin = vin 
+
+ 
+
+        count = 0 
