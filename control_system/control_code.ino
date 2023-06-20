@@ -160,7 +160,7 @@ void sensor_update(){
     roll_ang = 0;
   prev_roll_ang = (unsigned short)(roll_ang*256);
 
-  prev_pitch_ang = pitch_ang;
+  // prev_pitch_ang = pitch_ang;
 
   if (accel_y != 0 || accel_z != 0){
     pitch_ang = (pitch_ang + pitch_vel*time_diff) * P_CompCoeff;
@@ -194,6 +194,7 @@ int pitch_control(long double desired_pitch_ang){
 }
 
 int x_position = 0;
+int x_theta = 0;
 int x_moved = 0;
 
 long double position_control(){
@@ -243,13 +244,13 @@ void loop() {
 
   sensor_update();
 
-  // x_position -= x_theta;  // to be corrected on later loops 
+  // if (x_theta == 0) x_position -= x_moved;  // to be corrected on later loops, idk
   
   if (dynamic){
-    continue; // TODO: to be implemented
+    ; // TODO: to be implemented
   }
   else{ // for the static case
-    x_theta = pitch_controller_output(position_control());
+    x_theta = pitch_control(position_control());
     if (abs(x_theta) < 5){
       digitalWrite(stepPinL, LOW);
       digitalWrite(stepPinR, LOW);
