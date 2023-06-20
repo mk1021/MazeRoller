@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
+import AWS from 'aws-sdk';
+
+/*AWS.config.update({
+  accessKeyId: 'YOUR_ACCESS_KEY_ID',
+  secretAccessKey: 'YOUR_SECRET_ACCESS_KEY',
+  region: 'YOUR_REGION',
+});*/
 
 function App() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -7,42 +14,41 @@ function App() {
   const [lines, setLines] = useState([]);
   const [intervalId, setIntervalId] = useState(null);
   const [bestRoute, setBestRoute] = useState([]);
-
   //const [, updatecoordinateArray] = useState([[]]);
 
-  const updateCoordinateArray = (nextCoordinate) => {
+  /*const updateCoordinateArray = (nextCoordinate) => {
     setLines((prevLines) => [...prevLines, nextCoordinate]);
-  }; 
-  
-  useEffect(() => {
+  };*/
+
+  //useEffect(() => {
     const fetchCoordinates = () => {
       fetch("http://localhost:3001/nextCoordinate")
         .then((res) => res.json())
         .then((data) => {
-          //setLines((prevLines) => [...prevLines, data]);
-          updateCoordinateArray(data);
-          console.log("fetch successful");
+          setLines((prevLines) => [...prevLines, data]);
+          //updateCoordinateArray(data);
+          console.log('fetch successful:', data);
+        })
+        .catch((err) =>console.error('Error fetching coordinates:', err)); //alert(err));
+    }; 
+    
+    /*const fetchCoordinates = () => {
+      const coordinate = lines[currentIndex];
+      const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(coordinate),
+      };
+  
+      fetch('http://localhost:3001/esp32/', requestOptions)
+        .then(() => {
+          console.log('Coordinates sent:', coordinate);
+          setCurrentIndex((prevIndex) => prevIndex + 1);
         })
         .catch((err) => alert(err));
-    };
+    };*/
 
-  /*const fetchCoordinates = () => {
-    const coordinate = lines[currentIndex];
-    const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(coordinate),
-    };
-
-    fetch('http://localhost:3001/esp32/', requestOptions)
-      .then(() => {
-        console.log('Coordinates sent:', coordinate);
-        setCurrentIndex((prevIndex) => prevIndex + 1);
-      })
-      .catch((err) => alert(err));
-  };*/
-
-  //handleClick is our event handler for the button click
+    //handleClick is our event handler for the button click
     /*const handleClick = (updateMethod) => {
     fetch("http://localhost:3001/nextCoordinate/")
     .then((res) => res.json())
@@ -51,7 +57,7 @@ function App() {
     );
     };*/
 
-    const moveSquare = () => {
+    /*const moveSquare = () => {
       const square = document.querySelector('.square');
       const rectangle = document.querySelector('.rectangle');
 
@@ -67,7 +73,7 @@ function App() {
         clearInterval(intervalId);
         return;
       }
-      
+
       const coordinate = coordinateArray[currentIndex];
       const randomTop = maxTop - coordinate.y;
       const randomLeft = coordinate.x;
@@ -76,26 +82,26 @@ function App() {
       square.style.left = `${randomLeft}px`;
 
       const line = { x: randomLeft, y: randomTop };
-      setLines((prevLines) => [...prevLines, line]);
+      setLines((prevLines) => [...prevLines, line]);*/
 
       /*if (currentIndex === coordinateArray.length - 1) {
         clearInterval(intervalId);
       } else {*/
-        setCurrentIndex((prevIndex) => prevIndex + 1);
+      /*setCurrentIndex((prevIndex) => prevIndex + 1);
+    };*/
+
+  useEffect(() => {
+    if (isMoving) {
+      const id = setInterval(fetchCoordinates, 1000);
+      setIntervalId(id);
+    } else {
+      clearInterval(intervalId);
+    }
+
+    return () => {
+      clearInterval(intervalId);
     };
-
-    //useEffect(() => {
-      if (isMoving) {
-        const id = setInterval(fetchCoordinates, 1000);
-        setIntervalId(id);
-      } else {
-        clearInterval(intervalId);
-      }
-
-      return () => {
-        clearInterval(intervalId);
-      };
-  }, [isMoving, currentIndex/*, coordinateArray*/]);
+  }, [isMoving/*, currentIndex/*, coordinateArray*/]);
 
   const handleStart = () => {
     setIsMoving(true);
@@ -110,9 +116,9 @@ function App() {
         setBestRoute(data);
         console.log("Best route:", data);
       })
-      .catch((err) => alert(err));
+      .catch((err) => console.error('Error finding best route:', err));// alert(err));
   };
-  
+
   return (
     <div className="container">
       <h1>The Maze Roller's Map</h1>
@@ -121,7 +127,11 @@ function App() {
           <div
             key={index}
             className="line"
-            style={{ top: line.y, left: line.x }}
+            style={{
+              top: line.y + 'px',
+              left: line.x + 'px',
+              display: index === 0 ? 'none' : 'block', //only draws lines between first plotted point onwards
+            }}
           ></div>
         ))}
         {bestRoute.map((coordinate, index) => (
