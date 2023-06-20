@@ -129,7 +129,7 @@ long double roll_vel, pitch_vel, yaw_vel;
 float P_CompCoeff = 0.95; // complementary filter coefficient
 unsigned short prev_roll_ang = 0, roll_err_counter = 0; // counts static roll angle error
 
-long double K_p, K_i, K_d; // TODO: actually implement these things for PID
+long double K_p, K_i, K_d;
 long double err_curr, err_total, err_rate;
 
 void loop() {
