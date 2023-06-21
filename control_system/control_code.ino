@@ -13,6 +13,21 @@
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
 #include <math.h>
+#include <WiFi.h>
+
+// Replace with your network credentials
+const char* ssid     = "maze_rolling_outlaw";
+const char* password = "BouncyIsSuchABop";
+
+// Set web server port number to 80
+WiFiServer server(80);
+WiFiClient client;
+
+unsigned int client_timer_tic, client_timer_toc;
+
+// Variable to store the HTTP request
+String header = "";
+
 
 Adafruit_MPU6050 mpu;
 
@@ -79,19 +94,40 @@ void calibrate_sensors(int offset_loops){
   Serial.println("done :)");
 }
 
+// ------------------------- arduino setup ----------------------------------------
 
 void setup() {
-  // Declare pins as output:
+  // - - - - - - - - - pin setup  - - - - - - - - -
   pinMode(stepPinL, OUTPUT);
   pinMode(dirPinL, OUTPUT);
   pinMode(stepPinR, OUTPUT);
   pinMode(dirPinR, OUTPUT);
 
-  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  // - - - - - - - - - serial setup  - - - - - - - - -
 
   Serial.begin(1000000);
   while (!Serial)
     delay(10);  // will pause Zero, Leonardo, etc until serial console opens
+
+  Serial.setTimeout(1); // make it spend around 1 microsecond on input reading
+
+  // - - - - - - - - - server setup  - - - - - - - - -
+
+  Serial.print("Setting up AP (Access Point). . .");
+  // Remove the password parameter, if you want the AP (Access Point) to be open
+  WiFi.softAP(ssid, password);
+
+  IPAddress IP = WiFi.softAPIP();
+  Serial.print("AP IP address: ");
+  Serial.println(IP);
+
+  server.begin();
+
+  client.setTimeout(1); // TODO: Check if reading client messages takes a second or a millisecond. If the latter, great
+                        // if the former, either remove the "*1000" that sits in the function definition in the library
+                        // or just remove the server stuff
+
+  // - - - - - - - - - mpu setup  - - - - - - - - -
 
   Serial.println("Adafruit MPU6050 test!");
 
@@ -110,12 +146,6 @@ void setup() {
   mpu.setFilterBandwidth(MPU6050_BAND_21_HZ); // maybe 44Hz LP, dk
 
   calibrate_sensors(10);
-
-  // Set the spinning direction counterclockwise:
-  digitalWrite(dirPinL, LOW);
-  digitalWrite(dirPinR, HIGH);
-
-  Serial.setTimeout(1); // make it spend around 1 microsecond on input reading
 
   prevTime = curTime = micros();
 }
@@ -177,7 +207,7 @@ void sensor_update(){
 
 long double prev_ang_err, curr_ang_err, total_ang_err;
 const long double K_p = 1, K_i = 1, K_d = 1; // TODO: change this to make it do the balance
-const double control_to_mvmnt = 3.1415; // TODO: change this to make output fit desired movement change
+/*const*/double control_to_mvmnt = 3.1415; // TODO: change this to make output fit desired movement change
 // a higher value means more movement to achieve a desired pitch, lower value means less movement
 
 // Maybe think about acceleration during movement, how much does that affect the correction?
@@ -202,8 +232,8 @@ int x_moved = 0;
 int z_to_rotate = 0; // positive is clockwise, negative is anti-clockwise
 int movement_input = 0; // from exploration, will be used to adjust x_position
 bool rotation = false;
-const double yaw_to_rotation = 60; // TODO: tune to get yaw to rotation amount
-const double pos_to_ang = 5; // TODO: tune to give better value for desired pitch angle
+/*const*/double yaw_to_rotation = 60; // TODO: tune to get yaw to rotation amount
+/*const*/double pos_to_ang = 5; // TODO: tune to give better value for desired pitch angle
 // i.e. if it's tilting too much and falling over when moving, this needs to be higher,
 //      if it's not tilting enough and falling backwards when moving, this needs to be lower, etc.
 
@@ -287,6 +317,9 @@ void move_stationary(){
 
 // ------------------ main loop -----------------------
 
+float dyn_ks_pitch_ang = 0.01, dyn_ks_pitch_vel = 5, dyn_ks_lin_vel = 100;
+// TODO: tune these (below) and replace variables with numbers
+
 void loop() {
   comm = Serial.readString();
   
@@ -326,11 +359,11 @@ void loop() {
         break;
     }
 
-    // TODO: tune these three values, which as killswitches for dynamic mode
-    if((abs(pitch_ang) < 0.01)  // not sure about this condition, I feel if it's upright before reaching it's target,
+    // TODO: tune these three values, which act as killswitches for dynamic mode
+    if((abs(pitch_ang) < dyn_ks_pitch_ang)  // not sure about this condition, I feel if it's upright before reaching it's target,
                                 // it's probably gonna fall back, but I'm not sure
-    || (abs(pitch_vel) > 5)     // if it's falling too quickly, probably want to stop?
-    || (abs(linear_velocity) > 100))  // if it's moving too quickly, that's also probably not good
+    || (abs(pitch_vel) > dyn_ks_pitch_vel)     // if it's falling too quickly, probably want to stop?
+    || (abs(linear_velocity) > dyn_ks_lin_vel))  // if it's moving too quickly, that's also probably not good
         dynamic = false; // turn off dynamic mode
   }
   else{ // for the static case
@@ -371,4 +404,130 @@ void loop() {
       else move_backward();
     }
   }
+
+  // ------------------server things------------------------------
+
+  if(!client) client = server.available();
+
+  Serial.println("New Client found.");
+  String currentLine = "";
+  if (client.connected()) {
+    if (client.available()) {
+      client_timer_tic = micros();
+      char c = client.read();
+      client_timer_tic = micros();
+      header += c;
+
+      if (c != '\n'){
+        // if you got anything else but a carriage return character, add it to the end of the currentLine
+        if (c != '\r') currentLine += c;
+      }
+      else{
+        if (currentLine.length() != 0) currentLine = ""; // got a newline, so clear currentLine
+        else{ // got a newline with an already empty line, end of HTTP msg
+
+          // TODO: use the URL to alter values, the IP, then /sth/1.234567, only have 8 characters to play with for the
+          // values, i.e. 7 digits, please use all, so 2.300000, since this code'll read 8 characters in no matter what
+          int index;
+          String input = "";
+          if ((index = header.indexOf("GET /K_p/")) >= 0) {
+            index += 9;
+            input = header.substring(index, index+8);
+            K_p = input.toDouble();
+          } else if ((index = header.indexOf("GET /K_i/")) >= 0) {
+            index += 9;
+            input = header.substring(index, index+8);
+            K_i = input.toDouble();
+          } else if ((index = header.indexOf("GET /K_d/")) >= 0) {
+            index += 9;
+            input = header.substring(index, index+8);
+            K_d = input.toDouble();
+          } else if ((index = header.indexOf("GET /ctm/")) >= 0) {
+            index += 9;
+            input = header.substring(index, index+8);
+            control_to_mvmnt = input.toDouble();
+          } else if ((index = header.indexOf("GET /ytr/")) >= 0) {
+            index += 9;
+            input = header.substring(index, index+8);
+            yaw_to_rotation = input.toDouble();
+          } else if ((index = header.indexOf("GET /pta/")) >= 0) {
+            index += 9;
+            input = header.substring(index, index+8);
+            pos_to_ang = input.toDouble();
+          } else if ((index = header.indexOf("GET /aam/")) >= 0) {
+            index += 9;
+            input = header.substring(index, index+8);
+            approx_acceleration_magnitude = input.toDouble();
+          } else if ((index = header.indexOf("GET /dpa/")) >= 0) {
+            index += 9;
+            input = header.substring(index, index+8);
+            dyn_ks_pitch_ang = input.toFloat();
+          } else if ((index = header.indexOf("GET /dpv/")) >= 0) {
+            index += 9;
+            input = header.substring(index, index+8);
+            dyn_ks_pitch_vel = input.toFloat();
+          } else if ((index = header.indexOf("GET /dlv/")) >= 0) {
+            index += 9;
+            input = header.substring(index, index+8);
+            dyn_ks_lin_vel = input.toFloat();
+          }
+
+          // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
+          // and a content-type so the client knows what's coming, then a blank line:
+          client.println("HTTP/1.1 200 OK");
+          client.println("Content-type:text/html");
+          client.println("Connection: close");
+          client.println();
+
+          // Display the HTML web page
+          client.println("<!DOCTYPE html><html>");
+          // Web Page Heading
+          client.println("<body><h1>ESP32 Web Server</h1>");
+
+          client.print("<p>K_p = ");
+          client.print(K_p);
+          client.println("</p>");
+          client.print("<p>K_i = ");
+          client.print(K_i);
+          client.println("</p>");
+          client.print("<p>K_d = ");
+          client.print(K_d);
+          client.println("</p>");
+          client.print("<p>control_to_mvmnt = ");
+          client.print(control_to_mvmnt);
+          client.println("</p>");
+          client.print("<p>yaw_to_rotation = ");
+          client.print(yaw_to_rotation);
+          client.println("</p>");
+          client.print("<p>pos_to_ang = ");
+          client.print(pos_to_ang);
+          client.println("</p>");
+          client.print("<p>approx_acceleration_magnitude = ");
+          client.print(approx_acceleration_magnitude);
+          client.println("</p>");
+          client.print("<p>dyn_ks_pitch_ang = ");
+          client.print(dyn_ks_pitch_ang);
+          client.println("</p>");
+          client.print("<p>dyn_ks_pitch_vel = ");
+          client.print(dyn_ks_pitch_vel);
+          client.println("</p>");
+          client.print("<p>dyn_ks_lin_vel = ");
+          client.print(dyn_ks_lin_vel);
+          client.println("</p>");
+
+          client.println("</body></html>");
+          // The HTTP response ends with another blank line
+          client.println();
+          // Break out of the while loop
+          break;
+        }
+      }
+    }
+  }
+  // Clear the header variable
+  header = "";
+  // Close the connection
+  client.stop();
+  Serial.println("Client disconnected.");
+  Serial.println("");
 }
