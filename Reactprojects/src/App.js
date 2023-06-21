@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
-import AWS from 'aws-sdk';
+//import AWS from 'aws-sdk';
 
 /*AWS.config.update({
   accessKeyId: 'YOUR_ACCESS_KEY_ID',
@@ -31,22 +31,6 @@ function App() {
         })
         .catch((err) =>console.error('Error fetching coordinates:', err)); //alert(err));
     }; 
-    
-    /*const fetchCoordinates = () => {
-      const coordinate = lines[currentIndex];
-      const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(coordinate),
-      };
-  
-      fetch('http://localhost:3001/esp32/', requestOptions)
-        .then(() => {
-          console.log('Coordinates sent:', coordinate);
-          setCurrentIndex((prevIndex) => prevIndex + 1);
-        })
-        .catch((err) => alert(err));
-    };*/
 
     //handleClick is our event handler for the button click
     /*const handleClick = (updateMethod) => {
@@ -90,9 +74,14 @@ function App() {
       /*setCurrentIndex((prevIndex) => prevIndex + 1);
     };*/
 
+
+
   useEffect(() => {
     if (isMoving) {
-      const id = setInterval(fetchCoordinates, 1000);
+      const id = setInterval(() => {
+        fetchCoordinates();
+        setCurrentIndex((prevIndex) => prevIndex + 1);
+      }, 1000);
       setIntervalId(id);
     } else {
       clearInterval(intervalId);
@@ -138,10 +127,16 @@ function App() {
           <div
             key={index}
             className="best-route-line"
-            style={{ top: coordinate.y, left: coordinate.x }}
+            style={{ top: coordinate.y + 'px', left: coordinate.x + 'px'}}
           ></div>
         ))}
-        <div className="square"></div>
+        <div 
+          className="square"
+          style={{
+            top: lines[currentIndex]?.y + 'px',
+            left: lines[currentIndex]?.x + 'px',
+          }}
+        ></div>
       </div>
       <button onClick={handleStart} disabled={isMoving}>
         Start
