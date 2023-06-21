@@ -277,6 +277,8 @@ double update_velocity(){
 
 // ------------------ simple movement functions -----------------------
 
+double input_to_rotation = 1, input_to_distance = 1;
+
 void move_forward(){
   digitalWrite(dirPinL, HIGH);
   digitalWrite(dirPinR, HIGH);
@@ -376,8 +378,8 @@ void loop() {
         if(z_to_rotate == 0){ // has nowhere left to rotate to
           // deal with exploration inputs
           if(movement_input != 0){
-            if(rotation) z_to_rotate += movement_input;
-            else x_position += movement_input;
+            if(rotation) z_to_rotate += movement_input*input_to_rotation;
+            else x_position += movement_input*input_to_distance;
             movement_input = 0;
           }
           move_stationary();
@@ -470,6 +472,14 @@ void loop() {
             index += 9;
             input = header.substring(index, index+8);
             dyn_ks_lin_vel = input.toFloat();
+          } else if ((index = header.indexOf("GET /itr/")) >= 0) {
+            index += 9;
+            input = header.substring(index, index+8);
+            input_to_rotation = input.toDouble();
+          } else if ((index = header.indexOf("GET /itd/")) >= 0) {
+            index += 9;
+            input = header.substring(index, index+8);
+            input_to_distance = input.toDouble();
           }
 
           // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
