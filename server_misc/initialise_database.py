@@ -49,8 +49,8 @@ def create_mvmnt_table(dynamodb):
         SSESpecification={
             'Enabled': False
         },
-        TableClass= 'STANDARD_INFREQUENT_ACCESS',
-        DeletionProtectionEnabled = False
+        TableClass='STANDARD_INFREQUENT_ACCESS',
+        DeletionProtectionEnabled=False
     )
 
     if not response:
@@ -111,8 +111,8 @@ def create_corner_table(dynamodb):
         SSESpecification={
             'Enabled': False
         },
-        TableClass= 'STANDARD'
-        DeletionProtectionEnabled= True
+        TableClass= 'STANDARD',
+        DeletionProtectionEnabled=True
     )
 
     if not response:
@@ -159,8 +159,8 @@ def create_path_table(dynamodb):
         SSESpecification={
             'Enabled': False
         },
-        TableClass= 'STANDARD'
-        DeletionProtectionEnabled= True
+        TableClass= 'STANDARD',
+        DeletionProtectionEnabled=True
     )
 
     if not response:
@@ -211,8 +211,8 @@ def create_backup_table(dynamodb):
         SSESpecification={
             'Enabled': False
         },
-        TableClass= 'STANDARD_INFREQUENT_ACCESS',
-        DeletionProtectionEnabled = True
+        TableClass='STANDARD_INFREQUENT_ACCESS',
+        DeletionProtectionEnabled=True
     )
 
     if not response:
