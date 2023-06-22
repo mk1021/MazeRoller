@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 @dataclass
 class Coin:
-    """like a regular coin, but in 2D and in decimals..."""
+    """like a regular coin, but in 2D and fractional..."""
     x: float
     y: float
 
@@ -16,7 +16,7 @@ class Coin:
 
 
 def correct_coords(data, reliable_coords):
-    if data.empty():
+    if not data:
         return data
 
     error = Coin()
@@ -28,18 +28,56 @@ def correct_coords(data, reliable_coords):
         return data
 
     nodes = len(data)
-    coins_total = (nodes * (nodes+1) * (nodes+2)) / 6  # quantitative easing right here
+    coins_total = (nodes * (nodes+1)) / 2  # quantitative easing right here
     value = Coin(error.x / coins_total, error.y / coins_total)
 
     carry = Coin(0, 0)
     node_wealth = Coin()
     rounded = Coin()
+    coins_used = 0
     for i in range(nodes):
-        coins_per_node = i*(i+1) / 2
+        coins_per_node = (i+1)*(i+2) / 2  # since i starts from 0
+        coins_used += coins_per_node
         node_wealth.x = coins_per_node*value.x + carry.x
-        node_wealth.y = coins_per_node * value.y + carry.y
-        # TODO: Finish writing up the implementation of this algorithm
+        node_wealth.y = coins_per_node*value.y + carry.y
 
+        rounded.x = round(node_wealth.x)
+        rounded.y = round(node_wealth.y)
+
+        carry.x =  node_wealth.x - rounded.x 
+        carry.y =  node_wealth.y - rounded.y  # update carry values for next node
+
+        data[i].x += rounded.x
+        data[i].y += rounded.y
+
+        # just to check that we don't leave the board, though this should never happen in practice
+        data[i].x *= data[i].x > 0
+        data[i].x *= data[i].y > 0
+
+        if data[i].x > map_length: 
+            data[i].x = map_length
+        if data[i].y > map_width:
+            data[i].y = map_width
+
+    return data
+
+
+"""  # data structure for data should be a list of data entries, like the below:
+@dataclass
+class DataEntry:
+    x: int
+    y: int
+    heading: double
+    etc.: undefined
+
+    def __init__(self, a: int = 0, b: int = 0, heading: int = 0, etc.: int = 0):
+        self.x, self.y = a, b
+"""
 
 if __name__ == '__main__':
-    correct_coords({}, ())
+    map_length = 343
+    map_width = 225
+
+    data = []  # nice list of data entries
+    data = correct_coords(data, (0, 0))
+    print(data)

@@ -11,9 +11,17 @@ import './App.css';
 function App() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMoving, setIsMoving] = useState(false);
-  const [lines, setLines] = useState([]);
+  const [lines, setLines] = useState([
+      /*{ x: 100, y: 100 },
+      { x: 200, y: 100 },
+      { x: 200, y: 200 },
+      { x: 300, y: 200 },
+    */
+  ]);
   const [intervalId, setIntervalId] = useState(null);
+  const [pathLines, setPathLines] = useState([]);
   const [bestRoute, setBestRoute] = useState([]);
+  //const containerHeight = 421;
   //const [, updatecoordinateArray] = useState([[]]);
 
   /*const updateCoordinateArray = (nextCoordinate) => {
@@ -25,9 +33,11 @@ function App() {
       fetch("http://localhost:3001/nextCoordinate")
         .then((res) => res.json())
         .then((data) => {
+          //const coordinate = {x: data.x, y: data.y};
           setLines((prevLines) => [...prevLines, data]);
           //updateCoordinateArray(data);
           console.log('fetch successful:', data);
+          console.log('lines array:', lines)
         })
         .catch((err) =>console.error('Error fetching coordinates:', err)); //alert(err));
     }; 
@@ -41,46 +51,21 @@ function App() {
     );
     };*/
 
-    /*const moveSquare = () => {
-      const square = document.querySelector('.square');
-      const rectangle = document.querySelector('.rectangle');
-
-      const squareRect = square.getBoundingClientRect();
-      const rectangleRect = rectangle.getBoundingClientRect();
-
-      const maxTop = rectangleRect.height - squareRect.height;
-      const maxLeft = rectangleRect.width - squareRect.width;
-
-      const coordinateArray = lines;
-
-      if (currentIndex >= coordinateArray.length) {
-        clearInterval(intervalId);
-        return;
-      }
-
-      const coordinate = coordinateArray[currentIndex];
-      const randomTop = maxTop - coordinate.y;
-      const randomLeft = coordinate.x;
-
-      square.style.top = `${randomTop}px`;
-      square.style.left = `${randomLeft}px`;
-
-      const line = { x: randomLeft, y: randomTop };
-      setLines((prevLines) => [...prevLines, line]);*/
-
-      /*if (currentIndex === coordinateArray.length - 1) {
-        clearInterval(intervalId);
-      } else {*/
-      /*setCurrentIndex((prevIndex) => prevIndex + 1);
-    };*/
-
-
-
   useEffect(() => {
     if (isMoving) {
       const id = setInterval(() => {
         fetchCoordinates();
-        setCurrentIndex((prevIndex) => prevIndex + 1);
+        setCurrentIndex((prevIndex) =>   prevIndex + 1);
+        console.log('in the fetching loop');
+          /*const nextIndex = prevIndex + 1;
+          if (nextIndex >= lines.length) {
+            setIsMoving(false);
+            clearInterval(intervalId);
+            return prevIndex; // Add this line to prevent going out of bounds
+          }
+          setPathLines((prevPathLines) => [...prevPathLines, lines[nextIndex]]);
+          return nextIndex;
+        });*/
       }, 1000);
       setIntervalId(id);
     } else {
@@ -90,51 +75,74 @@ function App() {
     return () => {
       clearInterval(intervalId);
     };
-  }, [isMoving/*, currentIndex/*, coordinateArray*/]);
+  }, [isMoving/*, intervalId, lines, currentIndex/*, coordinateArray*/]);
 
   const handleStart = () => {
     setIsMoving(true);
-    setLines([]);
+    setPathLines([...lines.slice(0, currentIndex + 1)]);
+    //setLines([]);
+    console.log('Started');
     setCurrentIndex(0);
   };
 
   const handleFindBestRoute = () => {
-    fetch("http://localhost:3001/bestRoute")
+    /*fetch("http://localhost:3001/bestRoute")
       .then((res) => res.json())
       .then((data) => {
         setBestRoute(data);
         console.log("Best route:", data);
       })
-      .catch((err) => console.error('Error finding best route:', err));// alert(err));
-  };
+      .catch((err) => console.error('Error finding best route:', err));// alert(err));*/
+      console.log('Finding the best route...');
+    };
 
   return (
     <div className="container">
       <h1>The Maze Roller's Map</h1>
       <div className="rectangle">
-        {lines.map((line, index) => (
-          <div
-            key={index}
-            className="line"
-            style={{
-              top: line.y + 'px',
-              left: line.x + 'px',
-              display: index === 0 ? 'none' : 'block', //only draws lines between first plotted point onwards
-            }}
-          ></div>
-        ))}
+        {pathLines.map((coordinate, index) => {
+          if (index < pathLines.length - 1) {
+            const nextCoordinate = pathLines[index + 1];
+            console.log('Taken in the next coordinate');
+            return (
+              <div
+                key={index}
+                className="line"
+                style={{
+                  top: `${421 - coordinate.y}px`,
+                  left: `${coordinate.x}px`,
+                  width: `${Math.sqrt(
+                    Math.pow(nextCoordinate.x - coordinate.x, 2) +
+                    Math.pow(nextCoordinate.y - coordinate.y, 2)
+                  )}px`,
+                  transform: `rotate(${Math.atan2(
+                    nextCoordinate.y - coordinate.y,
+                    nextCoordinate.x - coordinate.x
+                  )}rad)`,
+                  
+              //display: index === 0 ? 'none' : 'block', //only draws lines between first plotted point onwards
+                }}
+              ></div>
+            );
+          }
+          console.log('Draw line return finished');
+          return null;
+        })}
         {bestRoute.map((coordinate, index) => (
           <div
             key={index}
             className="best-route-line"
-            style={{ top: coordinate.y + 'px', left: coordinate.x + 'px'}}
+            style={{ 
+              top: `${421 - coordinate.y}px`, 
+              left: `${coordinate.x}px`,
+            }}
           ></div>
         ))}
         <div 
           className="square"
           style={{
-            top: lines[currentIndex]?.y + 'px',
-            left: lines[currentIndex]?.x + 'px',
+            top: `${421 - lines[currentIndex]?.y}px`,
+            left: `${lines[currentIndex]?.x}px`,
           }}
         ></div>
       </div>

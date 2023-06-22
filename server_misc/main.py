@@ -8,22 +8,35 @@ import dual_angle_triangulation as data
 
 
 @dataclass
-class Coords:
-    """good things come in pairs, and so do these..."""
+class DataEntry:
+    """shadows the structure of a tuple for the database, not sure why..."""
+    entry_type: str
     x: int
     y: int
+    heading: float
+    locaNum: int
+    dist_to_goal: float
+    followLWall: bool
 
     def distance_from(self, point) -> float:  # dk how to ensure that point is of type Coords
-        return math.sqrt((point.x - self.x)**2 + (point.y - self.y)**2)
+        return math.sqrt((point.x - self.x) ** 2 + (point.y - self.y) ** 2)
 
-    def __init__(self, a: int = 0, b: int = 0):
-        self.x, self.y = a, b
+    def __init__(self, entry_type: str = "", x_coord: int = 0, y_coord: int = 0,
+                 heading: float = 0, localisation_num: int = 0,
+                 distance_to_goal: float = 420, following_left_wall: bool = True):
+        self.entry_type = entry_type
+        self.x, self.y = x_coord, y_coord
+        self.heading = heading
+        self.locNum = localisation_num
+        self.dist_to_goal = distance_to_goal
+        self.followLWall = following_left_wall
 
 
 def update_table(dynamodb_obj, data_things):
     print("hi")
     # TODO: write the up to data thing, idk
     #       input heading to be stored with the previous set of coords (new set yet to be calculated)
+
 
 # also a function to retrieve data after a website dropout
 
@@ -37,8 +50,8 @@ def data_to_distance(sth):  # TODO: add relevant conversion calculation
     return sth
 
 
-def distance_to_goal(point):
-    return math.sqrt((map_length-point.x)**2 + (map_width-point.y)**2)
+def how_far_from_goal(point):
+    return math.sqrt((map_length - point.x) ** 2 + (map_width - point.y) ** 2)
 
 
 def new_coord(prev_coord, data):
@@ -68,7 +81,7 @@ def main():
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     # when receive new coords
-    mvmnt_data = [5, math.pi/2]  # tcp.receive() or sth
+    mvmnt_data = [5, math.pi / 2]  # tcp.receive() or sth
 
     buffered_data.append(mvmnt_data)
 
@@ -82,11 +95,9 @@ def main():
 
     buffered_data.clear()
 
-
     coord = new_coord(coord, mvmnt_data)
 
     prev_heading = mvmnt_data[1]
-
 
     path_bitmap = bound_lines.generate_path(active_data)
 
