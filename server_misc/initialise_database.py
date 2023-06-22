@@ -8,72 +8,49 @@ def create_mvmnt_table(dynamodb):
     response = dynamodb.create_table(
         AttributeDefinitions=[
             {
-                'AttributeName': 'string',
-                'AttributeType': 'S' | 'N' | 'B'
+                'AttributeName': 'itemNum',
+                'AttributeType': 'N'
             },
+            {
+                'AttributeName': 'xCoord',
+                'AttributeType': 'N'
+            },
+            {
+                'AttributeName': 'yCoord',
+                'AttributeType': 'N'
+            },
+            {
+                'AttributeName': 'heading',
+                'AttributeType': 'N'
+            },
+            {
+                'AttributeName': 'followingLeftWall',
+                'AttributeType': 'B'
+            },
+            {
+                'AttributeName': 'localisationNum',
+                'AttributeType': 'N'
+            }
         ],
-        TableName='string',
+        TableName='Movement',
         KeySchema=[
             {
-                'AttributeName': 'string',
-                'KeyType': 'HASH' | 'RANGE'
+                'AttributeName': 'itemNum',
+                'KeyType': 'HASH'
             },
-        ],
-        LocalSecondaryIndexes=[
             {
-                'IndexName': 'string',
-                'KeySchema': [
-                    {
-                        'AttributeName': 'string',
-                        'KeyType': 'HASH' | 'RANGE'
-                    },
-                ],
-                'Projection': {
-                    'ProjectionType': 'ALL' | 'KEYS_ONLY' | 'INCLUDE',
-                    'NonKeyAttributes': [
-                        'string',
-                    ]
-                }
-            },
-        ],
-        GlobalSecondaryIndexes=[
-            {
-                'IndexName': 'string',
-                'KeySchema': [
-                    {
-                        'AttributeName': 'string',
-                        'KeyType': 'HASH' | 'RANGE'
-                    },
-                ],
-                'Projection': {
-                    'ProjectionType': 'ALL' | 'KEYS_ONLY' | 'INCLUDE',
-                    'NonKeyAttributes': [
-                        'string',
-                    ]
-                },
-                'ProvisionedThroughput': {
-                    'ReadCapacityUnits': 123,
-                    'WriteCapacityUnits': 123
-                }
+                'AttributeName': 'localisationNum',
+                'KeyType': 'RANGE'
             },
         ],
         StreamSpecification={
-            'StreamEnabled': True | False,
-            'StreamViewType': 'NEW_IMAGE' | 'OLD_IMAGE' | 'NEW_AND_OLD_IMAGES' | 'KEYS_ONLY'
+            'StreamEnabled': False
         },
         SSESpecification={
-            'Enabled': True | False,
-            'SSEType': 'AES256' | 'KMS',
-            'KMSMasterKeyId': 'string'
+            'Enabled': False
         },
-        Tags=[
-            {
-                'Key': 'string',
-                'Value': 'string'
-            },
-        ],
-        TableClass='STANDARD' | 'STANDARD_INFREQUENT_ACCESS',
-        DeletionProtectionEnabled=True | False
+        TableClass= 'STANDARD_INFREQUENT_ACCESS',
+        DeletionProtectionEnabled = False
     )
 
     if not response:
@@ -87,72 +64,55 @@ def create_corner_table(dynamodb):
     response = dynamodb.create_table(
         AttributeDefinitions=[
             {
-                'AttributeName': 'string',
-                'AttributeType': 'S' | 'N' | 'B'
+                'AttributeName': 'itemNum',
+                'AttributeType': 'N'
+            },
+            {
+                'AttributeName': 'xCoord',
+                'AttributeType': 'N'
+            },
+            {
+                'AttributeName': 'yCoord',
+                'AttributeType': 'N'
+            },
+            {
+                'AttributeName': 'distanceToGoal',
+                'AttributeType': 'N'
             },
         ],
-        TableName='string',
+        TableName='Corners',
         KeySchema=[
             {
-                'AttributeName': 'string',
-                'KeyType': 'HASH' | 'RANGE'
+                'AttributeName': 'itemNum',
+                'KeyType': 'HASH'
+            },
+            {
+                'AttributeName': 'xCoord',
+                'KeyType': 'RANGE'
             },
         ],
         LocalSecondaryIndexes=[
             {
-                'IndexName': 'string',
+                'IndexName': 'ySweep',
                 'KeySchema': [
                     {
-                        'AttributeName': 'string',
-                        'KeyType': 'HASH' | 'RANGE'
+                        'AttributeName': 'yCoord',
+                        'KeyType': 'RANGE'
                     },
                 ],
                 'Projection': {
-                    'ProjectionType': 'ALL' | 'KEYS_ONLY' | 'INCLUDE',
-                    'NonKeyAttributes': [
-                        'string',
-                    ]
-                }
-            },
-        ],
-        GlobalSecondaryIndexes=[
-            {
-                'IndexName': 'string',
-                'KeySchema': [
-                    {
-                        'AttributeName': 'string',
-                        'KeyType': 'HASH' | 'RANGE'
-                    },
-                ],
-                'Projection': {
-                    'ProjectionType': 'ALL' | 'KEYS_ONLY' | 'INCLUDE',
-                    'NonKeyAttributes': [
-                        'string',
-                    ]
-                },
-                'ProvisionedThroughput': {
-                    'ReadCapacityUnits': 123,
-                    'WriteCapacityUnits': 123
+                    'ProjectionType': 'ALL'
                 }
             },
         ],
         StreamSpecification={
-            'StreamEnabled': True | False,
-            'StreamViewType': 'NEW_IMAGE' | 'OLD_IMAGE' | 'NEW_AND_OLD_IMAGES' | 'KEYS_ONLY'
+            'StreamEnabled': False
         },
         SSESpecification={
-            'Enabled': True | False,
-            'SSEType': 'AES256' | 'KMS',
-            'KMSMasterKeyId': 'string'
+            'Enabled': False
         },
-        Tags=[
-            {
-                'Key': 'string',
-                'Value': 'string'
-            },
-        ],
-        TableClass='STANDARD' | 'STANDARD_INFREQUENT_ACCESS',
-        DeletionProtectionEnabled=True | False
+        TableClass= 'STANDARD'
+        DeletionProtectionEnabled= True
     )
 
     if not response:
@@ -166,72 +126,41 @@ def create_path_table(dynamodb):
     response = dynamodb.create_table(
         AttributeDefinitions=[
             {
-                'AttributeName': 'string',
-                'AttributeType': 'S' | 'N' | 'B'
+                'AttributeName': 'xCoord',
+                'AttributeType': 'N'
             },
+                        {
+                'AttributeName': 'yCoord',
+                'AttributeType': 'N'
+            },
+                        {
+                'AttributeName': 'localisationNum',
+                'AttributeType': 'N'
+            }
         ],
-        TableName='string',
+        TableName='PathSquares',
         KeySchema=[
             {
-                'AttributeName': 'string',
-                'KeyType': 'HASH' | 'RANGE'
+                'AttributeName': 'xCoord',
+                'KeyType': 'HASH'
             },
-        ],
-        LocalSecondaryIndexes=[
             {
-                'IndexName': 'string',
-                'KeySchema': [
-                    {
-                        'AttributeName': 'string',
-                        'KeyType': 'HASH' | 'RANGE'
-                    },
-                ],
-                'Projection': {
-                    'ProjectionType': 'ALL' | 'KEYS_ONLY' | 'INCLUDE',
-                    'NonKeyAttributes': [
-                        'string',
-                    ]
-                }
+                'AttributeName': 'yCoord',
+                'KeyType': 'HASH'
             },
-        ],
-        GlobalSecondaryIndexes=[
             {
-                'IndexName': 'string',
-                'KeySchema': [
-                    {
-                        'AttributeName': 'string',
-                        'KeyType': 'HASH' | 'RANGE'
-                    },
-                ],
-                'Projection': {
-                    'ProjectionType': 'ALL' | 'KEYS_ONLY' | 'INCLUDE',
-                    'NonKeyAttributes': [
-                        'string',
-                    ]
-                },
-                'ProvisionedThroughput': {
-                    'ReadCapacityUnits': 123,
-                    'WriteCapacityUnits': 123
-                }
+                'AttributeName': 'localisationNum',
+                'KeyType': 'RANGE'
             },
         ],
         StreamSpecification={
-            'StreamEnabled': True | False,
-            'StreamViewType': 'NEW_IMAGE' | 'OLD_IMAGE' | 'NEW_AND_OLD_IMAGES' | 'KEYS_ONLY'
+            'StreamEnabled': False
         },
         SSESpecification={
-            'Enabled': True | False,
-            'SSEType': 'AES256' | 'KMS',
-            'KMSMasterKeyId': 'string'
+            'Enabled': False
         },
-        Tags=[
-            {
-                'Key': 'string',
-                'Value': 'string'
-            },
-        ],
-        TableClass='STANDARD' | 'STANDARD_INFREQUENT_ACCESS',
-        DeletionProtectionEnabled=True | False
+        TableClass= 'STANDARD'
+        DeletionProtectionEnabled= True
     )
 
     if not response:
@@ -245,72 +174,45 @@ def create_backup_table(dynamodb):
     response = dynamodb.create_table(
         AttributeDefinitions=[
             {
-                'AttributeName': 'string',
-                'AttributeType': 'S' | 'N' | 'B'
+                'AttributeName': 'itemNum',
+                'AttributeType': 'N'
             },
+            {
+                'AttributeName': 'xCoord',
+                'AttributeType': 'N'
+            },
+            {
+                'AttributeName': 'yCoord',
+                'AttributeType': 'N'
+            },
+            {
+                'AttributeName': 'heading',
+                'AttributeType': 'N'
+            },
+            {
+                'AttributeName': 'localisationNum',
+                'AttributeType': 'N'
+            }
         ],
-        TableName='string',
+        TableName='Movement',
         KeySchema=[
             {
-                'AttributeName': 'string',
-                'KeyType': 'HASH' | 'RANGE'
+                'AttributeName': 'itemNum',
+                'KeyType': 'HASH'
             },
-        ],
-        LocalSecondaryIndexes=[
             {
-                'IndexName': 'string',
-                'KeySchema': [
-                    {
-                        'AttributeName': 'string',
-                        'KeyType': 'HASH' | 'RANGE'
-                    },
-                ],
-                'Projection': {
-                    'ProjectionType': 'ALL' | 'KEYS_ONLY' | 'INCLUDE',
-                    'NonKeyAttributes': [
-                        'string',
-                    ]
-                }
-            },
-        ],
-        GlobalSecondaryIndexes=[
-            {
-                'IndexName': 'string',
-                'KeySchema': [
-                    {
-                        'AttributeName': 'string',
-                        'KeyType': 'HASH' | 'RANGE'
-                    },
-                ],
-                'Projection': {
-                    'ProjectionType': 'ALL' | 'KEYS_ONLY' | 'INCLUDE',
-                    'NonKeyAttributes': [
-                        'string',
-                    ]
-                },
-                'ProvisionedThroughput': {
-                    'ReadCapacityUnits': 123,
-                    'WriteCapacityUnits': 123
-                }
+                'AttributeName': 'localisationNum',
+                'KeyType': 'RANGE'
             },
         ],
         StreamSpecification={
-            'StreamEnabled': True | False,
-            'StreamViewType': 'NEW_IMAGE' | 'OLD_IMAGE' | 'NEW_AND_OLD_IMAGES' | 'KEYS_ONLY'
+            'StreamEnabled': False
         },
         SSESpecification={
-            'Enabled': True | False,
-            'SSEType': 'AES256' | 'KMS',
-            'KMSMasterKeyId': 'string'
+            'Enabled': False
         },
-        Tags=[
-            {
-                'Key': 'string',
-                'Value': 'string'
-            },
-        ],
-        TableClass='STANDARD' | 'STANDARD_INFREQUENT_ACCESS',
-        DeletionProtectionEnabled=True | False
+        TableClass= 'STANDARD_INFREQUENT_ACCESS',
+        DeletionProtectionEnabled = True
     )
 
     if not response:
@@ -323,7 +225,7 @@ def create_tables():
     create_mvmnt_table(dynamodb)
     create_corner_table(dynamodb)
     create_path_table(dynamodb)
-    create_backup_table(dynamodb)
+#    create_backup_table(dynamodb)
 
     print("tables successfully created")
 
