@@ -8,16 +8,28 @@ import dual_angle_triangulation as dat
 
 
 @dataclass
-class Coords:
-    """good things come in pairs, and so do these..."""
+class DataEntry:
+    """shadows the structure of a tuple for the database, not sure why..."""
+    entry_type: str
     x: int
     y: int
+    heading: float
+    locaNum: int
+    dist_to_goal: float
+    followLWall: bool
 
     def distance_from(self, point) -> float:  # dk how to ensure that point is of type Coords
         return math.sqrt((point.x - self.x)**2 + (point.y - self.y)**2)
 
-    def __init__(self, a: int = 0, b: int = 0):
-        self.x, self.y = a, b
+    def __init__(self, entry_type: str = "", x_coord: int = 0, y_coord: int = 0, 
+                       heading: float = 0, localisationNum: int = 0, 
+                       distance_to_goal: float = 420, followingLeftWall: bool = True):
+        self.entry_type = entry_type
+        self.x, self.y = x_coord, y_coord
+        self.heading = heading
+        self.locNum = localisationNum
+        self.dist_to_goal = distance_to_goal
+        self.followLWall = followingLeftWall
 
 
 def update_table(dynamodb_obj, data_things):
