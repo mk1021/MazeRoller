@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from initialise_database import create_tables  # see if these causes problems since only the main function is here
 import line_bounding_path_generation as bound_lines
 from coin_coordinate_correction import correct_coords
-import dual_angle_triangulation as dat
+import dual_angle_triangulation as data
 
 
 @dataclass
