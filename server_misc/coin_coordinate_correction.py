@@ -1,8 +1,6 @@
 import math
-from dataclasses import dataclass
 
 
-@dataclass
 class Coin:
     """like a regular coin, but in 2D and fractional..."""
     x: float
@@ -61,18 +59,6 @@ def correct_coords(data, reliable_coords):
 
     return data
 
-
-"""  # data structure for data should be a list of data entries, like the below:
-@dataclass
-class DataEntry:
-    x: int
-    y: int
-    heading: double
-    etc.: undefined
-
-    def __init__(self, a: int = 0, b: int = 0, heading: int = 0, etc.: int = 0):
-        self.x, self.y = a, b
-"""
 
 if __name__ == '__main__':
     map_length = 343
