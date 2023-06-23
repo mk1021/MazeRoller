@@ -87,7 +87,7 @@ def main():
 
     # simple processing, then buffer collected data until new_localisation_data
 
-    dat.triangulate_coords("RB 0.9823123 BY 1.5678123")
+    dat.triangulate_coords("RB 0.9823123 BY 1.5678123")  # angle in radians
 
     active_data.stuff = buffered_data.stuff
 
