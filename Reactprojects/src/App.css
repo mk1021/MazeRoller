@@ -46,3 +46,9 @@ h1 {
   background-color: blue;
   transition: top 0.2s, left 0.2s;
 }
+.start-button,
+.find-route-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 20px;
+}

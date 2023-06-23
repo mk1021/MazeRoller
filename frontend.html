@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html> 
+<head>
+    <title>The Maze Roller's Map</title>
+    <style>
+
+/* This html file was used to help build the React front-end of the website
+
+        /* Basic CSS comment */
+        body {
+            background: #BBB;
+            color: black;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            /* To stack the elements on top of each other vertically */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 90vh;
+        }
+        h1 {
+            font-size: 35px;
+            color: #333;
+            text-align: center;
+        }
+        .rectangle {
+            position: relative;
+            width: 600px;
+            height: 421px;
+            background-color: black;
+            margin-top: 10px;
+        }
+        .square {
+            /* The square has an absolute position relative to the rectangular maze  */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            background-color: green;
+            transition: top 0.2s, left 0.2s;
+        }
+        .line {
+            position: absolute;
+            border: 1px solid white;
+        }
+        .start-button,
+        .find-route-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container"> 
+        <h1>The Maze Roller's Map</h1>
+        <div class="rectangle">
+            <div class="square"></div>
+            <canvas id="canvas"></canvas>
+        </div>
+        <button class="start-button">Start</button>
+        <button class="find-route-button">Find Best Route</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const square = document.querySelector('.square');
+            const rectangle = document.querySelector('.rectangle');
+            const canvas = document.querySelector('#canvas');
+            const startButton = document.querySelector('.start-button');
+            const findRouteButton = document.querySelector('.find-route-button');
+
+            canvas.width = rectangle.offsetWidth;
+            canvas.height = rectangle.offsetHeight;
+
+            const coordinates = [
+                { x: 0, y: rectangle.offsetHeight },
+                { x: 100, y: rectangle.offsetHeight - 100 },
+                { x: 200, y: rectangle.offsetHeight - 100 },
+                { x: 300, y: rectangle.offsetHeight - 200 },
+                { x: 300, y: rectangle.offsetHeight - 100 }
+            ];
+
+            let currentCoordinateIndex = 0;
+            let moveInterval;
+
+            const moveSquare = () => {
+                const currentCoordinate = coordinates[currentCoordinateIndex];
+
+                square.style.top = `${currentCoordinate.y}px`;
+                square.style.left = `${currentCoordinate.x}px`;
+
+                if (currentCoordinateIndex > 0) {
+                    drawLine(currentCoordinateIndex - 1);
+                }
+
+                currentCoordinateIndex++;
+
+                if (currentCoordinateIndex >= coordinates.length) {
+                    clearInterval(moveInterval);
+                }
+            };
+
+            const drawLine = (index) => {
+                const ctx = canvas.getContext('2d');
+                const startCoord = coordinates[index];
+                const endCoord = coordinates[index + 1];
+
+                ctx.strokeStyle = 'white';
+                ctx.beginPath();
+                ctx.moveTo(startCoord.x, startCoord.y);
+                ctx.lineTo(endCoord.x, endCoord.y);
+                ctx.stroke();
+            };
+
+            const drawLines = () => {
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                coordinates.forEach((coord, index) => {
+                    if (index < currentCoordinateIndex - 1) {
+                        drawLine(index);
+                    }
+                });
+            };
+
+            startButton.addEventListener('click', () => {
+                if (moveInterval) {
+                    clearInterval(moveInterval);
+                }
+
+                currentCoordinateIndex = 0;
+                drawLines();
+
+                moveInterval = setInterval(moveSquare, 1000);
+            });
+
+            findRouteButton.addEventListener('click', () => {
+                // Add your logic for finding the best route here
+            });
+        });
+    </script>
+</body>
+</html>

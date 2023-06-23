@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require('cors');
 const AWS = require('aws-sdk');
-const path = require('path');
+//const path = require('path');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -11,7 +11,7 @@ app.use(cors({
  origin: '*'
 }));
 
-app.use(express.static(path.resolve(__dirname, './my-app/build')));
+//app.use(express.static(path.resolve(__dirname, './my-app/build')));
 
 app.use(cors({
  methods: ['GET','POST','DELETE','UPDATE','PUT','PATCH']
@@ -23,6 +23,7 @@ app.use(express.json());
 let currentIndex = 0;
 let coordinateArray = [];
 
+//array for testing fetching
 /*const coordinateArray = [
     { x: 0, y: 0 },
     { x: 100, y: 100 },
@@ -86,7 +87,8 @@ setInterval(fetchCurrentCoordinates, 1000); // Check every 1 seconds
 
 app.get("/nextCoordinate", (req, res) => {
     if (currentIndex >= coordinateArray.length) {
-      currentIndex = 0; // Reset the index if all coordinates have been sent
+      currentIndex = 0;
+      return res.sendStatus(204); // Send a "No Content" response to indicate the end of the array
     }
   
     const nextCoordinate = coordinateArray[currentIndex];
@@ -142,9 +144,9 @@ app.get("/bestRoute", (req, res) => {
     return arr;
 }*/
   
-app.get('*', (req, res) => {
+/*app.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, './my-app/build', 'index.html'));
-});
+});*/
 
 app.listen(PORT, () => {
     console.log(`Server listening on ${PORT}`);

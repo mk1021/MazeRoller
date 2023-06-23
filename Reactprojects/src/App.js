@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
-//import AWS from 'aws-sdk';
+import AWS from 'aws-sdk';
 
-/*AWS.config.update({
+AWS.config.update({
   accessKeyId: 'YOUR_ACCESS_KEY_ID',
   secretAccessKey: 'YOUR_SECRET_ACCESS_KEY',
   region: 'YOUR_REGION',
-});*/
+});
 
 function App() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -28,13 +28,15 @@ function App() {
     setLines((prevLines) => [...prevLines, nextCoordinate]);
   };*/
 
-  //useEffect(() => {
+  React.useEffect(() => {
     const fetchCoordinates = () => {
       fetch("http://localhost:3001/nextCoordinate")
         .then((res) => res.json())
         .then((data) => {
           //const coordinate = {x: data.x, y: data.y};
-          setLines((prevLines) => [...prevLines, data]);
+          //setLines((prevLines) => [...prevLines, data]);
+          setLines(data);
+          setCurrentIndex((prevIndex) => prevIndex + 1);
           //updateCoordinateArray(data);
           console.log('fetch successful:', data);
           console.log('lines array:', lines)
@@ -51,11 +53,11 @@ function App() {
     );
     };*/
 
-  useEffect(() => {
+  //useEffect(() => {
     if (isMoving) {
       const id = setInterval(() => {
         fetchCoordinates();
-        setCurrentIndex((prevIndex) =>   prevIndex + 1);
+        //setCurrentIndex((prevIndex) =>   prevIndex + 1);
         console.log('in the fetching loop');
           /*const nextIndex = prevIndex + 1;
           if (nextIndex >= lines.length) {
